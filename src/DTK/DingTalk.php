@@ -78,6 +78,17 @@ class DingTalk
         }
         return $userinfo;
     }
+    /**
+     * 获取员工花名册信息
+     * @Author   xmwzg
+     * @DateTime 2021-03-09
+     * @param    {string}
+     * @param    [type]
+     * @return   [type]
+     */
+    public function hmcInfo($userid){
+
+    }
 
 }
 ?>
