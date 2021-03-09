@@ -87,6 +87,7 @@ class DingTalk
      */
     public function hmcInfo($userid){
       echo $userid;
+      
     }
 
 }
