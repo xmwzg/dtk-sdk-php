@@ -83,7 +83,6 @@ class DingTalk
      * @Author   xmwzg
      * @DateTime 2021-03-09
      * @param    {string}
-     * @param    [type]
      * @return   [type]
      */
     public function hmcInfo($userid){
