@@ -141,7 +141,7 @@ class DingTalk
       $req->setUseridList($userid);
       $msg = new \Msg;
       $msg->msgtype="oa";
-      $oa = new \OA;
+      $oa = new \Oa;
       $body = new \Body;
       $body->author="海豚系统";
       $body->content="海豚提醒您，".$send_name."给您转介了一个项目，请及时跟进处理。";
