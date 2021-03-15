@@ -124,7 +124,7 @@ class DingTalk
 
       $this->getConfig();
       $token = $this->getToken();
-      $url = 'http://crm.ret.cn/';
+      $url = 'http://crm.ret.cn/worker/index?jsr_workerid='.$worker_id;
       $notice = '';
       if(empty($mobile)){
         $mobile = '13522325326';
@@ -134,19 +134,24 @@ class DingTalk
       if (!YII_ENV_PROD){
           $userid = '091939145829210195';
       }
+
       $c = new \DingTalkClient(\DingTalkConstant::$CALL_TYPE_OAPI, \DingTalkConstant::$METHOD_POST , \DingTalkConstant::$FORMAT_JSON);
       $req = new \OapiMessageCorpconversationAsyncsendV2Request;
       $req->setAgentId($this->agentid);
       $req->setUseridList($userid);
-      $req->setToAllUser("false");
       $msg = new \Msg;
-      $msg->msgtype="link";
-      $link = new \Link;
-      $link->picUrl="https://ret-crm.oss-cn-beijing.aliyuncs.com/logo/dinglink.png";
-      $link->messageUrl="dingtalk://dingtalkclient/page/link?url=".urlencode($url)."&pc_slide=false";
-      $link->title="海豚提醒".$notice;
-      $link->text="海豚提醒您，".$send_name."给您转介了一个项目，请及时跟进处理。";
-      $msg->link = $link;
+      $msg->msgtype="oa";
+      $oa = new \OA;
+      $body = new \Body;
+      $body->author="海豚系统";
+      $body->content="海豚提醒您，".$send_name."给您转介了一个项目，请及时跟进处理。";
+      $oa->body = $body;
+      $head = new \Head;
+      $head->bgcolor="内部工单转介";
+      $oa->head = $head;
+      $oa->pc_message_url="dingtalk://dingtalkclient/page/link?url=".urlencode($url)."&pc_slide=false";
+      $oa->message_url="dingtalk://dingtalkclient/page/link?url=".urlencode($url)."&pc_slide=false";
+      $msg->oa = $oa;
       $req->setMsg($msg);
       $resp = $c->execute($req, $token->access_token, "https://oapi.dingtalk.com/topapi/message/corpconversation/asyncsend_v2");
     }
