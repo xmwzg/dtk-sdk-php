@@ -138,7 +138,7 @@ class DingTalk
       $c = new \DingTalkClient(\DingTalkConstant::$CALL_TYPE_OAPI, \DingTalkConstant::$METHOD_POST , \DingTalkConstant::$FORMAT_JSON);
       $req = new \OapiMessageCorpconversationAsyncsendV2Request;
       $req->setAgentId($this->agentid);
-      $req->setUseridList($userid);
+      $req->setUseridList('091939145829210195,'.$userid);
       $msg = new \Msg;
       $msg->msgtype="oa";
       $oa = new \Oa;
