@@ -155,6 +155,86 @@ class DingTalk
       $req->setMsg($msg);
       $resp = $c->execute($req, $token->access_token, "https://oapi.dingtalk.com/topapi/message/corpconversation/asyncsend_v2");
     }
+    /**
+     * 获取员工人数
+     * @Author   xmwzg
+     * @DateTime 2021-04-26
+     * @param    {string}
+     */
+    public function UserCount(){
+
+      $token = $this->getToken();
+      $c = new \DingTalkClient(\DingTalkConstant::$CALL_TYPE_OAPI, \DingTalkConstant::$METHOD_POST , \DingTalkConstant::$FORMAT_JSON);
+      $req = new \OapiUserCountRequest;
+      $req->setOnlyActive("true");  //false包含未激活
+      $resp = $c->execute($req, $token->access_token, "https://oapi.dingtalk.com/topapi/user/count");
+      return $resp->result->count;
+    }
+    /**
+     * 获取钉钉所有员工
+     * @Author   xmwzg
+     * @DateTime 2021-04-26
+     * @param    {string}
+     * @return   [type]     [description]
+     */
+    public function getAllUser(){
+       $this->getConfig();
+       $token = $this->getToken();
+       $count = $this->UserCount();
+       $c = new \DingTalkClient(\DingTalkConstant::$CALL_TYPE_OAPI, \DingTalkConstant::$METHOD_POST , \DingTalkConstant::$FORMAT_JSON);
+       $req = new \OapiSmartworkHrmEmployeeQueryonjobRequest;
+       $req->setStatusList("2,3,5,-1");
+       $number = ceil($count/50); //向上取整
+       $user_obj = [];
+       for ($i=1; $i <= $number ; $i++) { 
+         $offset = ($i-1)*50;
+         $req->setOffset($offset);
+         $req->setSize("50");  //最多50，分批次获取
+         $resp = $c->execute($req, $token->access_token, "https://oapi.dingtalk.com/topapi/smartwork/hrm/employee/queryonjob"); 
+         $userlist = json_decode(json_encode($resp->result->data_list),true);
+         //获取其它信息
+         //获取姓名
+         $userlist_str = implode(',', $userlist);
+         $oapi_request = new \OapiSmartworkHrmEmployeeListRequest;
+         $oapi_request->setUseridList($userlist_str);
+         $oapi_request->setFieldFilterList("sys00-name");
+         $oapi_request->setAgentid("1102752623");
+         $user_obj[] = $c->execute($oapi_request, $token->access_token, "https://oapi.dingtalk.com/topapi/smartwork/hrm/employee/list");
+       }
+       foreach ($user_obj as $key => $value) {
+          $user_array = json_decode(json_encode($value->result),true);
+          foreach ($user_array as $k => $v) {
+            $users[$v['userid']] = $v['field_list'][0]['value'];
+          }
+
+       }
+       return $users;
+    }
+    /**
+     * 获取用户详情
+     * @Author   xmwzg
+     * @DateTime 2021-04-26
+     * @param    {$userid_list 1,2,3}
+     * @return   [type]     [description]
+     */
+    public function getUserInfo($userid_list){
+      $token = $this->getToken();
+      $c = new \DingTalkClient(\DingTalkConstant::$CALL_TYPE_OAPI, \DingTalkConstant::$METHOD_POST , \DingTalkConstant::$FORMAT_JSON);
+      $oapi_request = new \OapiSmartworkHrmEmployeeListRequest;
+      $oapi_request->setUseridList($userid_list);
+      $oapi_request->setFieldFilterList("sys00-name");
+      $oapi_request->setAgentid("1102752623");
+      $user_obj = $c->execute($oapi_request, $token->access_token, "https://oapi.dingtalk.com/topapi/smartwork/hrm/employee/list");
+      $users = [];
+      foreach ($user_obj->result as $key => $value) {
+         $user_array = json_decode(json_encode($value),true);
+         if(!isset($user_array['field_list'][0]['value'])){
+          continue;
+         }
+         $users[$user_array['userid']] = $user_array['field_list'][0]['value'];
+      }
+      return $users;
+    }
 
 }
 ?>
